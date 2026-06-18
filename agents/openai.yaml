@@ -1,0 +1,6 @@
+interface:
+  display_name: "Goal Parallel"
+  short_description: "Parallel task decomposition with sub-agents"
+  icon_small: "./assets/icon.svg"
+  icon_large: "./assets/icon.svg"
+  default_prompt: "Decompose this task into parallel sub-tasks, spawn agents, collect and integrate results."
