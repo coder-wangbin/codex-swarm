@@ -29,7 +29,7 @@ No manual invocation needed — the model evaluates and decides.
 ```bash
 # Via skill-installer (if available)
 # Or clone directly:
-git clone https://github.com/YOUR_USER/goal-parallel.git ~/.codex/skills/goal-parallel
+git clone https://github.com/coder-wangbin/goal-parallel.git ~/.codex/skills/goal-parallel
 ```
 
 Restart Codex after installation.
