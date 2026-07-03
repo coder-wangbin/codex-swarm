@@ -1,5 +1,5 @@
 ---
-name: goal-parallel
+name: swarm
 description: >
   Automatic parallel task decomposition for complex multi-module work. Built on TWO
   foundational principles: (1) First Principles Thinking — force root-cause analysis

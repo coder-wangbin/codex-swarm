@@ -1,6 +1,6 @@
-# Goal Parallel
+# Swarm
 
-> A CodeX skill for automatic parallel task decomposition, built on two foundational pillars: First Principles Thinking and Adversarial Review.
+> A CodeX skill for parallel agent orchestration, built on two foundational pillars: First Principles Thinking and Adversarial Review.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE.txt)
 [![CodeX Skill](https://img.shields.io/badge/CodeX-Skill-339cff)](https://github.com/openai/codex)
@@ -11,7 +11,7 @@
 
 ## What It Does
 
-`goal-parallel` is a CodeX skill that automatically decomposes complex tasks into parallel sub-tasks with full agent lifecycle management. It's built on two "god-tier" prompting techniques:
+`swarm` is a CodeX skill that automatically decomposes complex tasks into parallel sub-tasks with full agent lifecycle management. It's built on two "god-tier" prompting techniques:
 
 | Pillar | Role | Core Logic |
 |--------|------|------------|
@@ -54,7 +54,7 @@ Every 2-4 weeks: global adversarial audit covering architecture, dependencies, c
 ## Installation
 
 ```bash
-git clone https://github.com/coder-wangbin/codex-goal-parallel.git ~/.codex/skills/goal-parallel
+git clone https://github.com/coder-wangbin/codex-swarm.git ~/.codex/skills/swarm
 # Restart CodeX
 ```
 
@@ -69,7 +69,7 @@ git clone https://github.com/coder-wangbin/codex-goal-parallel.git ~/.codex/skil
 ## Structure
 
 ```
-goal-parallel/
+swarm/
 ├── SKILL.md                    # Main skill file
 ├── README.md / README_en.md    # Documentation
 ├── LICENSE.txt                 # MIT
