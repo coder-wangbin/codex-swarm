@@ -6,18 +6,22 @@ description: >
   before decomposition,打断类比推理回到根本事实; (2) Adversarial Review — spawn
   multi-agent attack squads to break the system before users do. Model MUST use this
   skill when: task spans ≥3 files/≥2 modules, both exploration and implementation
-  needed, ≥2 independent sub-tasks, multi-dimensional verification required, user
-  says "parallel/concurrent/同时/并行/分头", OR user says "第一性原理/对抗式审查/
-  adversarial/first principles". Full sub-agent lifecycle with auto-recycle.
-  Triggers automatically — user does NOT need to invoke by name.
+  needed, ≥2 independent sub-tasks, user says "parallel/concurrent/同时/并行/分头",
+  user says "第一性原理/对抗式审查/adversarial/first principles", OR user says
+  "安全审查/越权/权限/代码审查/security audit/code review/审计".
+  Specialized in Go backend security (Auth/JWT/RBAC/middleware) and Feishu-integrated
+  projects. Full sub-agent lifecycle with auto-recycle. Triggers automatically.
 ---
 
-# Goal Parallel — First Principles Decomposition + Adversarial Review
+# Swarm — First Principles Decomposition + Adversarial Review
 
 Two pillars, one skill. **First Principles** governs generation — force AI to break
 analogical reasoning and re-derive from fundamentals. **Adversarial Review** governs
 verification — spawn attack agents to find every crack before users do. Together they
 form a complete closed loop for high-quality parallel task execution.
+
+Optimized for Go backend projects (skb, dinghe, lma, go-bmjx pattern), with
+specialized support for auth/security auditing and Feishu-integrated workflows.
 
 ## Core Philosophy
 
@@ -33,10 +37,6 @@ Adding "从第一性原理出发" or activating first-principles mode forces the
 3. Re-derive the solution from those facts
 4. Result: root-cause fixes, not surface patches
 
-> Examples: A bug fix that rewrites the routing layer instead of patching a single
-> scraper. A feature design that questions whether the requested feature is even the
-> right abstraction.
-
 ### Adversarial Review (对抗式审查)
 
 Standard verification is passive: run tests, check linter. But AI-written code has
@@ -44,22 +44,18 @@ hidden bugs that no test suite covers — because the test writer didn't imagine
 attack vector.
 
 Adversarial review flips the mindset: **you always need an opposing force to tell you
-you might be wrong.** Spawn agents whose explicit mission is to BREAK the system:
-
-- Edge cases the human never thought of ("what if the timestamp is in the future?")
-- Resource exhaustion ("what if 10,000 items arrive simultaneously?")
-- Data poisoning ("what if HTML contains a 100MB nested table?")
-- State corruption ("what if the cache says success but the DB says failure?")
-
-Adversarial agents are read-only (explorers) — they find bugs, don't fix them.
-Fixes go through workers or main agent after review.
+you might be wrong.** Spawn agents whose explicit mission is to BREAK the system.
 
 ### The Closed Loop
 
-```
-First Principles → Root-Cause Decomposition → Parallel Implementation → Adversarial Review → Fix → Verify
-       ↑                                                                                           │
-       └─────────────────────────── iterate if new issues found ──────────────────────────────────┘
+```mermaid
+flowchart LR
+  A["第一性原理"] --> B["根因分解"]
+  B --> C["并行实现"]
+  C --> D["对抗式审查"]
+  D --> E["修复根因"]
+  E --> F["再验证"]
+  F --> D
 ```
 
 ## Trigger Logic
@@ -75,161 +71,128 @@ First Principles → Root-Cause Decomposition → Parallel Implementation → Ad
 | 5 | User explicitly requests parallel | "并行", "同时", "分头", "concurrent" |
 | 6 | User invokes first principles | "从第一性原理出发", "first principles", "根本原因", "root cause" |
 | 7 | User invokes adversarial review | "对抗式审查", "adversarial", "攻击测试", "break it" |
+| 8 | User invokes security audit | "安全审查", "越权", "权限漏洞", "security audit", "漏洞" |
+| 9 | User invokes code review | "代码审查", "code review", "审计", "审查一下", "有什么问题" |
 
 **Mandatory adversarial review trigger** (independent of ≥2 rule):
 - After any non-trivial implementation completes (>3 files changed)
-- When user says "审查", "review my code", "check for bugs", "有什么问题"
-- When user is about to deploy/push to production (if signaled)
-
-**Skip parallel** only when: single-file trivial change, strict sequential deps, ≤2 tool calls.
+- When user says "审查", "review", "check for bugs", "有什么问题", "安全审查"
+- When user mentions "越权", "权限", "auth", "认证", "登录"
+- When user is about to deploy/push to production
 
 ## Execution Protocol
 
-### Phase 0 — First Principles Analysis (MANDATORY when condition 6 is met or task is non-trivial)
+### Phase 0 — First Principles Analysis (MANDATORY for non-trivial tasks)
 
-Before any decomposition, ask and answer in your own reasoning:
+Before any decomposition, ask and answer:
 
-1. **What is the real problem?** (not the symptom, not the requested feature description)
-2. **What are the fundamental facts / invariants / constraints?** (what MUST be true?)
-3. **What assumptions are we making?** (explicitly list and challenge each one)
-4. **If we started from scratch with only these facts, what would the solution look like?**
-
-Then — and only then — proceed to decomposition. The decomposition MUST reflect the
-first-principles analysis, not the surface file structure.
+1. **What is the real problem?** (not the symptom)
+2. **What are the fundamental facts / invariants / constraints?**
+3. **What assumptions are we making?** (challenge each one)
+4. **If we started from scratch with only these facts, what would the solution be?**
 
 ### Phase 1 — Assess & Plan
 
-1. Evaluate trigger conditions.
-2. If triggered: `create_goal("{one-line task summary, rooted in first principles if applicable}")`
-3. Decompose into sub-tasks. For adversarial review tasks, include attack agents.
-4. `update_plan` with one step per sub-agent.
+Evaluate triggers → `create_goal` → decompose → `update_plan`.
+
+For security/audit tasks, include dedicated auth attack vectors (see `references/auth-review.md`).
 
 ### Phase 2 — Decompose & Assign
 
-For each sub-task, declare:
-
-- **Agent type**: `worker` (read-write), `explorer` (read-only), or `attacker` (read-only explorer with adversarial mission)
-- **Write set**: exclusive file list for workers (no overlap)
-- **Mission**: concrete task. For attackers: "Find edge cases, security holes, logic flaws, resource leaks, and state corruption vectors in {scope}"
-
-Launch all independent sub-tasks in parallel. Queue excess beyond cap (12: ≤9 workers, ≤6 explorers/attackers).
+| Agent type | Access | Purpose |
+|-----------|--------|---------|
+| `worker` | read-write | Implementation with exclusive write set |
+| `explorer` | read-only | Code exploration, dependency analysis |
+| `attacker` | read-only | Adversarial review, security audit, edge-case hunting |
 
 ### Phase 3 — Monitor, Collect, Recycle
 
-Standard lifecycle loop (see `references/lifecycle.md` for full internals).
+Standard lifecycle loop (see `references/lifecycle.md`).
 
-**Special rule for adversarial phases**: Collect ALL attack findings before starting any fixes. Do not fix while attackers are still running — new attacks may reveal that the fix is wrong.
+### Phase 4 — Adversarial Review
 
-### Phase 4 — Adversarial Review (MANDATORY for non-trivial changes)
+After implementation, systematically attack across these dimensions:
 
-After implementation completes:
+- **Auth & Permission** (Go-specific): middleware bypass, role escalation, JWT/Cookie manipulation, RBAC gaps, route-level access control
+- **Temporal**: wrong/future/zero/overflow times
+- **Data**: empty, null, massive, malformed, nested, recursive
+- **Concurrency**: race conditions, deadlocks, goroutine leaks
+- **Resource**: memory, file descriptors, connections, disk
+- **State**: cache inconsistency, stale references, interrupted workflows
+- **Input**: injection, encoding, boundary values, type confusion
 
-1. **Generate attack vectors**: Based on the changed code, brainstorm ≥5 edge cases that could break it. Consider:
-   - Temporal: wrong time, future time, zero time, overflow
-   - Data: empty, null, massive, malformed, nested, recursive
-   - Concurrency: race conditions, deadlocks, partial writes
-   - Resource: memory, file descriptors, connections, disk
-   - State: inconsistent cache, stale references, interrupted workflows
-   - Input: injection, encoding, boundary values, type confusion
-
-2. **Spawn attack agents**: One explorer per attack vector category. All read-only. All parallel.
-
-3. **Collect findings**: Categorize as CRITICAL (will cause data loss/crash), HIGH (will cause incorrect behavior), MEDIUM (edge case), LOW (cosmetic).
-
-4. **Fix loop**: For each finding:
-   - Worker fixes the root cause (first principles — not just patching the symptom)
-   - Re-run adversarial review on the fixed scope
-   - Continue until attack agents find nothing new
+See `references/adversarial-review.md` for full taxonomy and
+`references/auth-review.md` for Go backend auth-specific attack patterns.
 
 ### Phase 5 — Integrate & Verify
 
-1. Merge all collected results. Resolve boundary conflicts.
-2. Final adversarial pass: one attacker for the integrated whole.
-3. Standard verification: build, test, lint.
-4. `update_goal("complete")`
-5. `update_plan` mark all complete.
+1. Merge results, resolve conflicts
+2. Final adversarial pass on integrated whole
+3. Build, test, lint
+4. `update_goal("complete")` + `update_plan`
 
 ## Adversarial Review Mode (Standalone)
 
-When user requests standalone adversarial review (not tied to implementation):
-
 ```
-"对抗式审查这个项目" / "review this codebase for bugs" / "adversarial audit"
+"安全审查这个项目" / "审查一下 auth 模块" / "code review"
 
 → create_goal("adversarial-review: {scope}")
 → Phase 0: First principles analysis of what could go wrong
-→ Phase 1: Map attack surface (files, APIs, data flows, state machines)
-→ Phase 2: Spawn attack agents by category (concurrency, data, state, resource, security)
-→ Phase 3: Collect and categorize findings
-→ Phase 4: Present prioritized report to user (do NOT auto-fix without approval)
-→ Phase 5: After user approval, fix + re-verify
+→ Map attack surface (middleware chain, auth flow, permission matrix, API routes)
+→ Spawn attackers: auth, concurrency, data, state, resource, security
+→ Collect + categorize (CRITICAL/HIGH/MEDIUM/LOW)
+→ Present prioritized report (do NOT auto-fix without user approval)
+→ After approval: fix + re-verify
 ```
 
-## Periodic Adversarial Audit Mode
+## Auth/Permission Security Audit Mode
 
-When user requests periodic audit or it's been >2 weeks since last review:
+When user says "越权", "权限漏洞", "安全审计", "auth audit":
 
-```
-"全面审查这个项目" / "periodic audit" / "定期审查"
+→ Spawn dedicated auth attackers covering:
+  - Route-level access control (is every route properly gated?)
+  - Role escalation (can low-privilege users access admin endpoints?)
+  - JWT/Cookie manipulation (expiry, signing, domain scope)
+  - Middleware bypass (order-dependent middleware chains)
+  - RBAC consistency (menu config vs code enforcement)
 
-→ Same as standalone adversarial review, but scope is the ENTIRE project
-→ Include architecture review, dependency audit, and documentation-to-code consistency
-→ This is the deepest review mode — expect it to find latent technical debt
-```
-
-## Sub-Agent Lifecycle
-
-```mermaid
-flowchart LR
-  A["CREATED"] --> B["RUNNING"]
-  B --> C["COMPLETED"]
-  B --> D["ERROR"]
-  B --> E["STALLED"]
-  C --> F["COLLECTED"]
-  D --> F
-  E --> F
-  F --> G["CLOSED"]
-```
-
-Liveness detection and recycle rules unchanged from `references/lifecycle.md`.
+See `references/auth-review.md` for detailed audit checklist and Go patterns.
 
 ## Concurrency Model
 
 ```
-Pool capacity: 12 total
-├── Workers:    ≤9  (read-write, exclusive write sets)
-├── Explorers:  ≤6  (read-only)
-└── Attackers:  ≤6  (read-only, adversarial mission — counted as explorers)
-Queue: unlimited, FIFO
+Pool: 12 agents max
+├── Workers:   ≤9  (read-write, exclusive write sets)
+├── Explorers: ≤6  (read-only)
+└── Attackers: ≤6  (read-only, adversarial mission)
+Queue: unlimited FIFO
 ```
-
-## Write Set Isolation
-
-Same rules as before. Attackers are read-only — no write-set conflict with anyone.
 
 ## Error Recovery
 
 | Error | Strategy |
 |-------|----------|
-| Compile/syntax error | Retry same worker once; then main agent fixes |
-| Logic error found by attacker | Worker fixes root cause, then re-attack |
+| Compile/syntax error | Retry once; then main agent fixes |
+| Logic error from attacker | Worker fixes root cause → re-attack |
 | Agent STALLED | Close + re-queue |
 | `spawn_agent` fails | Fall back to serial |
-| Partial failure | Use successful results; re-assign failures |
+| Partial failure | Use successes; re-assign failures |
 
 ## Anti-Patterns
 
-- Serial execution when parallel conditions are met.
-- Multiple workers sharing write-set files.
-- `spawn_agent` immediately → `wait_agent`.
-- Agent left open after COMPLETED/ERROR.
-- **Skipping first-principles analysis and jumping to surface decomposition**.
-- **Fixing adversarial findings as surface patches instead of root causes**.
-- **Fixing while attackers are still running** (new attacks may invalidate the fix).
-- Main agent duplicating worker/attacker work.
+- Serial execution when parallel conditions are met
+- Multiple workers sharing write-set files
+- `spawn_agent` → immediate `wait_agent`
+- Agent left open after COMPLETED/ERROR
+- Skipping first-principles analysis → surface decomposition
+- Fixing adversarial findings as surface patches instead of root causes
+- Fixing while attackers are still running
+- **Overlooking auth in adversarial review** for Go backend projects
+- Main agent duplicating worker/attacker work
 
 ## Reference Docs
 
-- `references/lifecycle.md` — Full lifecycle state machine, pool internals, edge cases
-- `references/patterns.md` — Decomposition recipes + adversarial patterns
-- `references/adversarial-review.md` — Attack vector taxonomy, multi-agent attack orchestration
+- `references/lifecycle.md` — Lifecycle state machine, pool internals
+- `references/patterns.md` — 11 decomposition patterns + anti-patterns
+- `references/adversarial-review.md` — Attack vector taxonomy
+- `references/auth-review.md` — Go backend auth/security audit (JWT, RBAC, middleware)

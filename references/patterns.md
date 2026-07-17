@@ -2,11 +2,8 @@
 
 ## Pattern 1: Multi-Module Feature
 
-**Task shape**: "Add feature X to modules A, B, and C"
-
 ```
 First Principles: Is feature X the right abstraction for all modules?
-                  If yes, what is the shared contract?
 
 Decomposition:
 ├── Worker-1: module_a/feature.go
@@ -15,8 +12,6 @@ Decomposition:
 ```
 
 ## Pattern 2: Explore-Then-Implement
-
-**Task shape**: "Understand how X works, then add Y"
 
 ```
 Phase 1 (parallel explorers):
@@ -33,8 +28,8 @@ Phase 2 (after collection):
 
 ```
 ├── Worker-1: implement X in source files
-├── Worker-2: write tests for X (separate test files)
-└── Explorer-1: explore existing test patterns for style
+├── Worker-2: write tests for X
+└── Explorer-1: explore existing test patterns
 ```
 
 ## Pattern 4: Cross-Cutting Refactor
@@ -56,28 +51,17 @@ Phase 2: Main agent verifies integration
 ```
 ├── Worker-1: go build ./...
 ├── Worker-2: go test ./pkg/...
-├── Worker-3: go test ./internal/...
-└── Worker-4: golangci-lint run
+├── Worker-3: golangci-lint run
 ```
 
 ## Pattern 7: Adversarial Review (Attack-Then-Fix)
 
-**Core idea**: After implementing ANY non-trivial feature, spawn attack agents before
-declaring the work done. Attackers find bugs → workers fix root causes → re-attack.
-
 ```
 Phase 0 — First Principles: What assumptions did we make? What invariants must hold?
 
-Phase 1 — Attack Vector Generation (main agent):
-  Brainstorm ≥5 edge cases per category:
-  - Temporal: wrong/future/zero/overflow times
-  - Data: empty, null, massive, malformed, nested, recursive
-  - Concurrency: races, deadlocks, partial writes
-  - Resource: memory, FDs, connections, disk
-  - State: inconsistent cache, stale refs, interrupted workflows
-  - Input: injection, encoding, boundary values, type confusion
+Phase 1 — Attack Vector Generation: ≥5 edge cases per category
 
-Phase 2 — Parallel Attack (all read-only explorers):
+Phase 2 — Parallel Attack (all read-only):
 ├── Attacker-1: temporal edge cases
 ├── Attacker-2: data edge cases
 ├── Attacker-3: concurrency edge cases
@@ -85,139 +69,110 @@ Phase 2 — Parallel Attack (all read-only explorers):
 ├── Attacker-5: state edge cases
 └── Attacker-6: input edge cases
 
-Phase 3 — Collect & Categorize:
-  CRITICAL: data loss, crash, security breach
-  HIGH: incorrect behavior, wrong output
-  MEDIUM: edge case, degraded UX
-  LOW: cosmetic
-
-Phase 4 — Fix Loop (per finding):
-  Worker fixes ROOT CAUSE (not surface symptom)
-  → Re-attack the fixed scope
-  → Continue until no new findings
-
-Phase 5 — Integration Adversarial Pass:
-  One final attacker for the integrated whole
-  → Fix any integration-level issues
+Phase 3 — Collect & Categorize: CRITICAL/HIGH/MEDIUM/LOW
+Phase 4 — Fix Loop: fix root cause → re-attack → repeat
+Phase 5 — Integration pass: one final attacker for the whole
 ```
-
-### When to use Pattern 7
-
-- After any implementation touching >3 files
-- Before deploying to production
-- When user says "审查", "review", "check for bugs"
-- When user says "对抗式审查", "adversarial", "attack test"
 
 ## Pattern 8: Periodic Adversarial Audit
 
-**When**: Every 2-3 weeks, or when user says "全面审查", "periodic audit", "定期审查".
-
-**Scope**: Entire project — architecture, dependencies, code quality, documentation.
-
+Every 2-4 weeks:
 ```
-Phase 0 — First Principles: What is this project's core mission?
-  What are the fundamental constraints? What assumptions have we made?
-  Re-derive the architecture from scratch. Does current structure match?
-
-Phase 1 — Architecture Audit (explorers, parallel):
-├── Attacker-1: architecture consistency (does code match docs/design?)
-├── Attacker-2: dependency analysis (circular? stale? bloated?)
-└── Attacker-3: module boundaries (are they correct? leaking?)
-
-Phase 2 — Code Quality Audit (explorers, parallel):
-├── Attacker-4: code smells (duplication, god objects, long methods)
-├── Attacker-5: error handling (swallowed errors, missing recovery)
-└── Attacker-6: concurrency safety (missing locks, race conditions)
-
-Phase 3 — Security & Robustness Audit (explorers, parallel):
-├── Attacker-7: injection vectors (SQL, command, template)
-├── Attacker-8: resource exhaustion (DoS, memory leaks, infinite loops)
-└── Attacker-9: data integrity (corruption, inconsistency, loss)
-
-Phase 4 — Documentation Audit (explorers, parallel):
-├── Attacker-10: code-to-doc consistency
-└── Attacker-11: API contract accuracy
-
-Phase 5 — Report: Prioritized findings → User approval → Fix → Re-audit fixed scope
+Phase 1 — Architecture: consistency, dependencies, boundaries (3 attackers)
+Phase 2 — Code Quality: smells, error handling, concurrency (3 attackers)
+Phase 3 — Security: injection, resource, data integrity (3 attackers)
+Phase 4 — Documentation: code-to-doc consistency, API accuracy (2 attackers)
+Phase 5 — Report → User approval → Fix → Re-audit
 ```
-
-### Audit cadence recommendation
-
-| Project maturity | Audit frequency |
-|-----------------|-----------------|
-| Active development | Every 2 weeks |
-| Stable maintenance | Every 4 weeks |
-| Pre-release | Full audit before every release |
 
 ## Pattern 9: First-Principles Bug Fix
 
-**Task shape**: "Fix bug X" where the bug may be a symptom of deeper issues.
-
 ```
-Phase 0 — First Principles (MANDATORY, main agent):
+Phase 0 (MANDATORY):
   1. What is the observed symptom?
-  2. What is the ACTUAL root cause? (ask "why?" 5 times)
+  2. What is the ROOT cause? (ask "why?" 5 times)
   3. What fundamental invariant is being violated?
-  4. Is this a one-off bug or a class of bugs?
-  5. If we fix the root cause, what ELSE might change?
+  4. Is this a one-off or a class of bugs?
 
 Phase 1 — Exploration (if needed):
-├── Explorer-1: trace the full data flow through the buggy path
-└── Explorer-2: find all similar patterns in the codebase
+├── Explorer-1: trace full data flow
+└── Explorer-2: find all similar patterns
 
-Phase 2 — Fix:
-  Worker: fix the ROOT CAUSE, not just the symptom.
-  Write set: all files that need to change for the root-cause fix.
-
-Phase 3 — Adversarial Review (Pattern 7):
-  Attack the fix to ensure no regressions and no similar bugs remain.
+Phase 2 — Fix root cause
+Phase 3 — Adversarial Review (Pattern 7)
 ```
 
-### Example from article
+## Pattern 10: Auth/Permission Security Audit
 
-Symptom: OpenAI scraper stopped working.
-Surface fix: Repair the scraper.
-First-principles fix: The underlying traffic routing mechanism had a design flaw
-from April — fixing the routing layer prevents ALL future scraper failures, not
-just this one.
+**Trigger**: "越权", "权限漏洞", "安全审查", "安全审计", "security audit"
+
+```
+Phase 0 — First Principles:
+  What is the trust boundary? Who can access what?
+
+Phase 1 — Surface Map:
+  └── Explorer-1: middleware chain, route groups, role constants, JWT config
+
+Phase 2 — Parallel Attack:
+├── Attacker-1: middleware chain + route access control
+│   (Does every route have correct auth? Any middleware ordering bugs?)
+├── Attacker-2: JWT/Cookie/Session security
+│   (Expiry, signing, domain scope, rotation, leakage)
+├── Attacker-3: role/permission escalation
+│   (Can low-privilege user reach admin endpoints? Default role bugs?)
+└── Attacker-4: DB-level consistency
+│   (Code RBAC vs DB RBAC drift, direct-DB bypass)
+
+Phase 3 — Report: CRITICAL/HIGH/MEDIUM/LOW
+Phase 4 — Fix + Re-attack (per CRITICAL/HIGH finding)
+```
+
+See `references/auth-review.md` for full Go-specific checklist.
+
+## Pattern 11: Multi-Project Parallel Analysis
+
+**Trigger**: When user asks about multiple projects simultaneously, or
+switches between skb/dinghe/lma in one conversation.
+
+```
+"检查 skb 和 dinghe 的 auth 模块有什么差异"
+
+├── Explorer-1: analyze skb auth (middleware, role, JWT)
+└── Explorer-2: analyze dinghe auth (middleware, role, JWT)
+
+→ Main agent: diff analysis, best-practice recommendations
+→ Shared write set: NONE (read-only analysis)
+```
 
 ## Anti-Patterns
 
-### Surface Fix Pattern (VIOLATES first principles)
+### Surface Fix (violates first principles)
 ```
-❌ Bug: scraper broken
-❌ Fix: patch scraper → done
+❌ Bug: scraper broken → Fix: patch scraper → done
 ```
-Root cause untouched. Bug will recur in another scraper.
+Root cause untouched. Bug recurs in another scraper.
 
-### Fix-While-Attacking Pattern
+### Fix-While-Attacking
 ```
-❌ Attacker-1 finds concurrency bug
-❌ Worker-1 starts fixing immediately
-❌ Attacker-2 finds related state bug → Worker-1's fix is wrong
+❌ Attacker finds bug → Worker fixes immediately
+   → Attacker-2 finds related bug → fix is wrong
 ```
 Fix: collect ALL findings before ANY fix.
 
 ### Symptom-Targeted Attack
 ```
 ❌ "Check if the login function works"
-✓ "Find every way the login function can fail, including ways
-   the user would never intentionally trigger"
-```
-Adversarial review must be creative, not checklist-driven.
-
-### Overlapping Write Sets (unchanged)
-```
-❌ Worker-1: pkg/logic/qa.go
-❌ Worker-2: pkg/logic/qa.go, pkg/logic/helper.go
+✓ "Find every way the login function can fail"
 ```
 
-### Spawn-Wait Spam (unchanged)
+### Overlooking Auth in Backend Projects
 ```
-❌ spawn → wait → spawn → wait
+❌ Adversarial review only checks data/concurrency
+   → misses middleware ordering bug
+✓ Always include auth-specific attackers for Go backend projects
 ```
 
-### Phantom Agents (unchanged)
-```
-❌ Complete → collect → never close
-```
+### Overlapping Write Sets
+### Spawn-Wait Spam
+### Phantom Agents
+(Unchanged from v2)
