@@ -4,131 +4,186 @@ description: >
   Automatic parallel task decomposition for complex multi-module work. Built on TWO
   foundational principles: (1) First Principles Thinking — force root-cause analysis
   before decomposition,打断类比推理回到根本事实; (2) Adversarial Review — spawn
-  multi-agent attack squads to break the system before users do. Model MUST use this
-  skill when: task spans ≥3 files/≥2 modules, both exploration and implementation
-  needed, ≥2 independent sub-tasks, user says "parallel/concurrent/同时/并行/分头",
-  user says "第一性原理/对抗式审查/adversarial/first principles", OR user says
-  "安全审查/越权/权限/代码审查/security audit/code review/审计".
-  Specialized in Go backend security (Auth/JWT/RBAC/middleware) and Feishu-integrated
-  projects. Full sub-agent lifecycle with auto-recycle. Triggers automatically.
+  multi-agent attack squads to break the system before users do. Also incorporates
+  anti-cheat guardrails (anti-skip/mock/||true/relax-assertions), structured agent
+  task briefs with boundaries and verification commands, adversarial verification
+  (故意触发bug证明检查生效), and PROGRESS.md resume-safe execution. Model MUST
+  use when: task spans ≥3 files/≥2 modules, exploration+implementation, ≥2
+  independent sub-tasks, user says "parallel/concurrent/同时/并行/分头/第一性原理/
+  对抗式审查/adversarial/安全审查/越权/权限/代码审查/code review/审计". Go backend
+  specialized (Auth/JWT/RBAC/middleware). Full lifecycle with auto-recycle.
 ---
 
-# Swarm — First Principles Decomposition + Adversarial Review
+# Swarm — First Principles + Adversarial Review + Anti-Cheat
 
-Two pillars, one skill. **First Principles** governs generation — force AI to break
-analogical reasoning and re-derive from fundamentals. **Adversarial Review** governs
-verification — spawn attack agents to find every crack before users do. Together they
-form a complete closed loop for high-quality parallel task execution.
+Three pillars. **First Principles** forces root-cause thinking. **Adversarial Review**
+finds cracks before users do. **Anti-Cheat Guardrails** prevent AI agents from taking
+shortcuts that silently break quality (skip tests, mock core logic, relax assertions).
 
-Optimized for Go backend projects (skb, dinghe, lma, go-bmjx pattern), with
-specialized support for auth/security auditing and Feishu-integrated workflows.
+Inspired by the [leader](https://github.com/KKKKhazix/khazix-skills/tree/main/leader)
+skill's philosophy: structured task briefs, adversarial verification, and
+resume-safe execution. Swarm applies these at scale — every spawned agent gets
+a properly gated mission, not a vague instruction.
+
+Optimized for Go backend projects (skb, dinghe, lma, go-bmjx pattern).
 
 ## Core Philosophy
 
+### Three Pillars
+
+```mermaid
+flowchart LR
+  A["第一性原理"] --> D["根因修复"]
+  B["对抗式审查"] --> D
+  C["防作弊护栏"] --> D
+  D --> E["高质量交付"]
+```
+
 ### First Principles Thinking (第一性原理)
 
-Most AI coding uses analogical reasoning: find similar code in training data, adapt it.
-This is fast but skips the most critical question: **is this really the right solution?**
+Force the agent to break analogical reasoning and re-derive from fundamentals:
 
-Adding "从第一性原理出发" or activating first-principles mode forces the agent to:
-
-1. Strip all assumptions and surface-level descriptions
-2. Identify the fundamental facts / invariants / constraints
+1. Strip all assumptions and surface descriptions
+2. Identify fundamental facts / invariants / constraints
 3. Re-derive the solution from those facts
 4. Result: root-cause fixes, not surface patches
 
 ### Adversarial Review (对抗式审查)
 
-Standard verification is passive: run tests, check linter. But AI-written code has
-hidden bugs that no test suite covers — because the test writer didn't imagine the
-attack vector.
+Spawn agents whose explicit mission is to BREAK the system. Standard verification
+is passive; adversarial review is active hunting.
 
-Adversarial review flips the mindset: **you always need an opposing force to tell you
-you might be wrong.** Spawn agents whose explicit mission is to BREAK the system.
+### Anti-Cheat Guardrails (防作弊护栏)
 
-### The Closed Loop
+AI coding agents are incentivized to make tests pass — the easiest way is
+shortcuts, not correctness. Every spawned worker receives explicit anti-cheat
+instructions naming the specific forbidden shortcuts:
 
-```mermaid
-flowchart LR
-  A["第一性原理"] --> B["根因分解"]
-  B --> C["并行实现"]
-  C --> D["对抗式审查"]
-  D --> E["修复根因"]
-  E --> F["再验证"]
-  F --> D
-```
+| Cheat | Forbidden Pattern |
+|-------|------------------|
+| Skip tests | `.skip`, `t.Skip()`, `it.skip`, `xtest` |
+| Relax assertions | widening `assert.Equal` tolerances |
+| Mock core logic | replacing tested function with stub |
+| Delete tests | removing failing test cases |
+| `\|\| true` | masking failures in shell commands |
+| Modify baselines | changing test count/coverage thresholds |
 
 ## Trigger Logic
 
-**Trigger this skill when ≥2 of these conditions are met:**
+**Trigger when ≥2 conditions are met:**
 
 | # | Condition | Example |
 |---|-----------|---------|
-| 1 | ≥3 independent files OR ≥2 independent modules | "Fix auth.go, qa.go, and handler.go" |
-| 2 | Both exploration and implementation needed | "Understand the codebase first, then add feature X" |
-| 3 | ≥2 sub-tasks with no data dependency | "Add logging to module A and module B" |
-| 4 | Multi-dimensional verification | "Build + test + lint after changes" |
-| 5 | User explicitly requests parallel | "并行", "同时", "分头", "concurrent" |
-| 6 | User invokes first principles | "从第一性原理出发", "first principles", "根本原因", "root cause" |
-| 7 | User invokes adversarial review | "对抗式审查", "adversarial", "攻击测试", "break it" |
-| 8 | User invokes security audit | "安全审查", "越权", "权限漏洞", "security audit", "漏洞" |
-| 9 | User invokes code review | "代码审查", "code review", "审计", "审查一下", "有什么问题" |
+| 1 | ≥3 files OR ≥2 modules | "Fix auth.go, qa.go, handler.go" |
+| 2 | Exploration + implementation | "Understand then add feature X" |
+| 3 | ≥2 independent sub-tasks | "Add logging to A and B" |
+| 4 | Multi-dimensional verification | "Build + test + lint" |
+| 5 | User requests parallel | "并行", "同时", "分头", "concurrent" |
+| 6 | First principles | "从第一性原理出发", "root cause" |
+| 7 | Adversarial review | "对抗式审查", "adversarial", "break it" |
+| 8 | Security audit | "安全审查", "越权", "权限漏洞", "security audit" |
+| 9 | Code review | "代码审查", "code review", "审计", "审查一下" |
 
-**Mandatory adversarial review trigger** (independent of ≥2 rule):
-- After any non-trivial implementation completes (>3 files changed)
-- When user says "审查", "review", "check for bugs", "有什么问题", "安全审查"
-- When user mentions "越权", "权限", "auth", "认证", "登录"
-- When user is about to deploy/push to production
+**Mandatory adversarial review** (independent of ≥2 rule):
+- After >3 files changed
+- User says "审查", "review", "check for bugs", "有什么问题"
+- User mentions "越权", "权限", "auth", "认证", "登录"
+- Before deploy/push to production
 
 ## Execution Protocol
 
-### Phase 0 — First Principles Analysis (MANDATORY for non-trivial tasks)
+### Phase 0 — Task Type Classification
 
-Before any decomposition, ask and answer:
+Before anything else, classify the task:
 
-1. **What is the real problem?** (not the symptom)
-2. **What are the fundamental facts / invariants / constraints?**
-3. **What assumptions are we making?** (challenge each one)
-4. **If we started from scratch with only these facts, what would the solution be?**
+| Type | Trigger | Agent strategy | Verification |
+|------|---------|---------------|-------------|
+| **Executive** (执行型) | Can write verification commands now | Workers with hard metrics | Command output pass/fail |
+| **Exploratory** (探索型) | User wants answers, not code | Explorers with learning goals | Evidence + reproduction steps |
 
-### Phase 1 — Assess & Plan
+### Phase 0.5 — Assumption Verification (Task 0)
 
-Evaluate triggers → `create_goal` → decompose → `update_plan`.
+**Spawn 1 explorer to verify assumptions BEFORE decomposition:**
 
-For security/audit tasks, include dedicated auth attack vectors (see `references/auth-review.md`).
+```
+Verify:
+- Do the referenced commands actually exist? (run them)
+- Do tests pass at baseline? (go test ./... count + pass rate)
+- Are the files we're about to touch in the expected state?
+- Any fake green lights? (lint that's just echo, tests that always pass)
 
-### Phase 2 — Decompose & Assign
+If verification fails → report to user, BLOCK decomposition until resolved.
+If passes → record baseline numbers (test count, coverage %, lint status).
+```
 
-| Agent type | Access | Purpose |
+### Phase 1 — First Principles + Leader's Decisions
+
+1. Ask "what's the real problem?" → root cause
+2. List assumptions made and their fallback values
+3. Output a **"替用户拍的板"** (decisions made on user's behalf) section:
+   - Each unasked decision → default value + cost of being wrong
+   - User can override before execution proceeds
+
+Then `create_goal("{summary}")` → decompose → `update_plan`.
+
+### Phase 2 — Decompose & Assign (with Anti-Cheat)
+
+For each spawned agent, the mission description MUST include:
+
+```
+1. BOUNDARY (地界): exact file whitelist, read-only zones
+2. VERIFICATION (验收): exact commands to run, machine-readable pass/fail criteria
+3. ANTI-CHEAT (防作弊): "Do NOT skip tests, relax assertions, mock core logic,
+   delete tests, use ||true, or modify test baselines. Test count/coverage
+   must be ≥ baseline. Violation = task failure."
+4. FORBIDDEN ACTIONS (禁止顺手活): "That one-line bug you noticed? Write it to
+   findings, do NOT fix it. That refactor you're tempted by? Don't."
+5. ADVERSARIAL SELF-CHECK (反向验证): "After your changes, intentionally trigger
+   ONE failure condition to prove your verification actually catches errors.
+   Show the red output, then restore the fix and show green."
+```
+
+| Agent type | Access | Mission |
 |-----------|--------|---------|
-| `worker` | read-write | Implementation with exclusive write set |
-| `explorer` | read-only | Code exploration, dependency analysis |
-| `attacker` | read-only | Adversarial review, security audit, edge-case hunting |
+| `worker-exec` | read-write | Executive implementation with anti-cheat |
+| `worker-fix` | read-write | Fix a specific adversarial finding |
+| `explorer` | read-only | Code exploration, baseline verification |
+| `attacker` | read-only | Adversarial review, security audit |
 
 ### Phase 3 — Monitor, Collect, Recycle
 
-Standard lifecycle loop (see `references/lifecycle.md`).
+Standard lifecycle loop. See `references/lifecycle.md`.
 
-### Phase 4 — Adversarial Review
+**Special rule**: For multi-agent executive tasks, each agent writes a
+`PROGRESS.md`-style status line on completion. If a session breaks, the
+next session reads these to resume without redoing work.
 
-After implementation, systematically attack across these dimensions:
+### Phase 4 — Adversarial Review (with Reverse Verification)
 
-- **Auth & Permission** (Go-specific): middleware bypass, role escalation, JWT/Cookie manipulation, RBAC gaps, route-level access control
-- **Temporal**: wrong/future/zero/overflow times
-- **Data**: empty, null, massive, malformed, nested, recursive
-- **Concurrency**: race conditions, deadlocks, goroutine leaks
-- **Resource**: memory, file descriptors, connections, disk
-- **State**: cache inconsistency, stale references, interrupted workflows
-- **Input**: injection, encoding, boundary values, type confusion
+After implementation:
 
-See `references/adversarial-review.md` for full taxonomy and
-`references/auth-review.md` for Go backend auth-specific attack patterns.
+1. Generate attack vectors (see `references/adversarial-review.md`)
+2. Spawn attackers in parallel (all read-only)
+3. Collect findings → categorize (CRITICAL/HIGH/MEDIUM/LOW)
+4. **Fix loop with reverse verification**:
+
+```
+For each CRITICAL/HIGH finding:
+  A. Worker fixes root cause
+  B. Worker runs adversarial self-check:
+     "Intentionally trigger the original bug condition.
+      Show the RED output (proves the check works).
+      Restore the fix.
+      Show the GREEN output."
+  C. If check doesn't catch the triggered bug → fix is incomplete → redo
+  D. Continue until reverse verification passes
+```
 
 ### Phase 5 — Integrate & Verify
 
 1. Merge results, resolve conflicts
 2. Final adversarial pass on integrated whole
-3. Build, test, lint
+3. Build, test, lint (all must pass, no regression in test count/coverage)
 4. `update_goal("complete")` + `update_plan`
 
 ## Adversarial Review Mode (Standalone)
@@ -137,34 +192,29 @@ See `references/adversarial-review.md` for full taxonomy and
 "安全审查这个项目" / "审查一下 auth 模块" / "code review"
 
 → create_goal("adversarial-review: {scope}")
-→ Phase 0: First principles analysis of what could go wrong
-→ Map attack surface (middleware chain, auth flow, permission matrix, API routes)
-→ Spawn attackers: auth, concurrency, data, state, resource, security
-→ Collect + categorize (CRITICAL/HIGH/MEDIUM/LOW)
-→ Present prioritized report (do NOT auto-fix without user approval)
-→ After approval: fix + re-verify
+→ Phase 0.5: baseline verification
+→ Map attack surface → spawn attackers → collect → categorize
+→ Present report (do NOT auto-fix without approval)
+→ After approval: fix + reverse verification per finding
 ```
 
 ## Auth/Permission Security Audit Mode
 
-When user says "越权", "权限漏洞", "安全审计", "auth audit":
+```
+"越权", "权限漏洞", "安全审计", "auth audit"
 
-→ Spawn dedicated auth attackers covering:
-  - Route-level access control (is every route properly gated?)
-  - Role escalation (can low-privilege users access admin endpoints?)
-  - JWT/Cookie manipulation (expiry, signing, domain scope)
-  - Middleware bypass (order-dependent middleware chains)
-  - RBAC consistency (menu config vs code enforcement)
-
-See `references/auth-review.md` for detailed audit checklist and Go patterns.
+→ Spawn dedicated auth attackers (see references/auth-review.md)
+→ Cover: middleware chain, route ACL, role escalation, JWT/Cookie, RBAC, DB consistency
+→ Report → fix → reverse verification
+```
 
 ## Concurrency Model
 
 ```
 Pool: 12 agents max
-├── Workers:   ≤9  (read-write, exclusive write sets)
-├── Explorers: ≤6  (read-only)
-└── Attackers: ≤6  (read-only, adversarial mission)
+├── worker-exec / worker-fix: ≤9  (read-write, exclusive write sets)
+├── explorer: ≤6  (read-only)
+└── attacker: ≤6  (read-only)
 Queue: unlimited FIFO
 ```
 
@@ -173,21 +223,23 @@ Queue: unlimited FIFO
 | Error | Strategy |
 |-------|----------|
 | Compile/syntax error | Retry once; then main agent fixes |
-| Logic error from attacker | Worker fixes root cause → re-attack |
+| Logic error from attacker | Worker fixes root cause → reverse verification |
 | Agent STALLED | Close + re-queue |
+| Agent cheats (skips tests, relaxes assertions) | Immediate failure, no retry. Main agent fixes. |
 | `spawn_agent` fails | Fall back to serial |
-| Partial failure | Use successes; re-assign failures |
+| Session breaks mid-task | Read PROGRESS.md markers from completed agents, resume |
 
-## Anti-Patterns
+## Anti-Patterns (NEVER)
 
 - Serial execution when parallel conditions are met
 - Multiple workers sharing write-set files
-- `spawn_agent` → immediate `wait_agent`
 - Agent left open after COMPLETED/ERROR
-- Skipping first-principles analysis → surface decomposition
-- Fixing adversarial findings as surface patches instead of root causes
+- Skipping first-principles → surface decomposition
 - Fixing while attackers are still running
-- **Overlooking auth in adversarial review** for Go backend projects
+- **Allowing agents to skip tests, relax assertions, mock core logic, or use ||true**
+- **Skipping reverse verification after fixes** (must prove the check catches the bug)
+- **Decomposing without Task 0 baseline verification**
+- Overlooking auth in adversarial review for Go backends
 - Main agent duplicating worker/attacker work
 
 ## Reference Docs
@@ -195,4 +247,5 @@ Queue: unlimited FIFO
 - `references/lifecycle.md` — Lifecycle state machine, pool internals
 - `references/patterns.md` — 11 decomposition patterns + anti-patterns
 - `references/adversarial-review.md` — Attack vector taxonomy
-- `references/auth-review.md` — Go backend auth/security audit (JWT, RBAC, middleware)
+- `references/auth-review.md` — Go backend auth/security audit
+- `references/task-brief.md` — **New**: Structured agent task brief template + anti-cheat clauses
